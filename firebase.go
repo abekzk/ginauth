@@ -2,6 +2,7 @@ package ginauth
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	firebase "firebase.google.com/go"
@@ -12,38 +13,42 @@ import (
 const FirebaseAuthTokenKey = "firebaseToken"
 
 type FirebaseAuthToken *auth.Token
-type FirebaseClient interface {
+
+type firebaseClient interface {
 	VerifyIDToken(context.Context, string) (*auth.Token, error)
 }
 
+type FirebaseAuth struct {
+	Client firebaseClient
+}
+
 // ref: https://firebase.google.com/docs/admin/setup#go
-func NewFirebaseClient() (*auth.Client, error) {
+func NewFirebaseAuth() *FirebaseAuth {
 	app, err := firebase.NewApp(context.Background(), nil)
 	if err != nil {
-		return nil, err
+		log.Fatal(err.Error())
 	}
 	client, err := app.Auth(context.Background())
 	if err != nil {
-		return nil, err
+		log.Fatal(err.Error())
 	}
-	return client, nil
+	return &FirebaseAuth{
+		Client: client,
+	}
 }
 
 // ref: https://firebase.google.com/docs/auth/admin/verify-id-tokens#go
-func NewFirebaseAuthorizer(client FirebaseClient) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		idToken, ok := extractTokenFromAuthHeader(c.Request.Header.Get("Authorization"))
-		if !ok {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
-
-		token, err := client.VerifyIDToken(context.Background(), idToken)
-		if err != nil {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
-		c.Set(FirebaseAuthTokenKey, FirebaseAuthToken(token))
-		c.Next()
+func (firebaseAuth *FirebaseAuth) apply(c *gin.Context) {
+	idToken, ok := extractTokenFromAuthHeader(c.Request.Header.Get("Authorization"))
+	if !ok {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
+
+	token, err := firebaseAuth.Client.VerifyIDToken(context.Background(), idToken)
+	if err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	c.Set(FirebaseAuthTokenKey, FirebaseAuthToken(token))
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,12 +9,9 @@ import (
 
 func main() {
 	router := gin.Default()
-	client, err := ginauth.NewFirebaseClient()
-	if err != nil {
-		log.Fatalf("error initializing: %v\n", err)
-	}
 
-	router.Use(ginauth.NewFirebaseAuthorizer(client))
+	auth := ginauth.NewFirebaseAuth()
+	router.Use(ginauth.NewAuthorizer(auth))
 
 	router.GET("/", func(c *gin.Context) {
 		token := c.MustGet(ginauth.FirebaseAuthTokenKey).(ginauth.FirebaseAuthToken)
