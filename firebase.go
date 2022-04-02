@@ -12,10 +12,12 @@ import (
 const FirebaseAuthTokenKey = "firebaseToken"
 
 type FirebaseAuthToken *auth.Token
-type FirebaseClient *auth.Client
+type FirebaseClient interface {
+	VerifyIDToken(context.Context, string) (*auth.Token, error)
+}
 
 // ref: https://firebase.google.com/docs/admin/setup#go
-func NewFirebaseClient() (FirebaseClient, error) {
+func NewFirebaseClient() (*auth.Client, error) {
 	app, err := firebase.NewApp(context.Background(), nil)
 	if err != nil {
 		return nil, err
@@ -28,7 +30,7 @@ func NewFirebaseClient() (FirebaseClient, error) {
 }
 
 // ref: https://firebase.google.com/docs/auth/admin/verify-id-tokens#go
-func NewFirebaseAuthorizer(client *auth.Client) gin.HandlerFunc {
+func NewFirebaseAuthorizer(client FirebaseClient) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		idToken, ok := extractTokenFromAuthHeader(c.Request.Header.Get("Authorization"))
 		if !ok {
