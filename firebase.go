@@ -11,6 +11,7 @@ import (
 
 const FirebaseAuthTokenKey = "firebaseToken"
 
+type FirebaseAuthToken *auth.Token
 type FirebaseClient *auth.Client
 
 // ref: https://firebase.google.com/docs/admin/setup#go
@@ -40,7 +41,7 @@ func NewFirebaseAuthorizer(client *auth.Client) gin.HandlerFunc {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
-		c.Set(FirebaseAuthTokenKey, token)
+		c.Set(FirebaseAuthTokenKey, FirebaseAuthToken(token))
 		c.Next()
 	}
 }
