@@ -2,13 +2,13 @@ package ginauth
 
 import "github.com/gin-gonic/gin"
 
-type Auth interface {
+type Provider interface {
 	apply(*gin.Context)
 }
 
-func NewAuthorizer(auth Auth) gin.HandlerFunc {
+func NewAuthorizer(p Provider) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		auth.apply(c)
+		p.apply(c)
 		c.Next()
 	}
 }

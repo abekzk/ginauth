@@ -18,12 +18,12 @@ type firebaseClient interface {
 	VerifyIDToken(context.Context, string) (*auth.Token, error)
 }
 
-type FirebaseAuth struct {
+type FirebaseAuthProvider struct {
 	Client firebaseClient
 }
 
 // ref: https://firebase.google.com/docs/admin/setup#go
-func NewFirebaseAuth() *FirebaseAuth {
+func NewFirebaseAuthProvider() *FirebaseAuthProvider {
 	app, err := firebase.NewApp(context.Background(), nil)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -32,20 +32,20 @@ func NewFirebaseAuth() *FirebaseAuth {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	return &FirebaseAuth{
+	return &FirebaseAuthProvider{
 		Client: client,
 	}
 }
 
 // ref: https://firebase.google.com/docs/auth/admin/verify-id-tokens#go
-func (firebaseAuth *FirebaseAuth) apply(c *gin.Context) {
+func (provider *FirebaseAuthProvider) apply(c *gin.Context) {
 	idToken, ok := extractTokenFromAuthHeader(c.Request.Header.Get("Authorization"))
 	if !ok {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
-	token, err := firebaseAuth.Client.VerifyIDToken(context.Background(), idToken)
+	token, err := provider.Client.VerifyIDToken(context.Background(), idToken)
 	if err != nil {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return

@@ -10,8 +10,8 @@ import (
 func main() {
 	router := gin.Default()
 
-	auth := ginauth.NewFirebaseAuth()
-	router.Use(ginauth.NewAuthorizer(auth))
+	provider := ginauth.NewFirebaseAuthProvider()
+	router.Use(ginauth.NewAuthorizer(provider))
 
 	router.GET("/", func(c *gin.Context) {
 		token := c.MustGet(ginauth.FirebaseAuthTokenKey).(ginauth.FirebaseAuthToken)
