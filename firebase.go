@@ -2,7 +2,6 @@ package ginauth
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	firebase "firebase.google.com/go"
@@ -26,11 +25,11 @@ type FirebaseAuthProvider struct {
 func NewFirebaseAuthProvider() *FirebaseAuthProvider {
 	app, err := firebase.NewApp(context.Background(), nil)
 	if err != nil {
-		log.Fatal(err.Error())
+		panic(err.Error())
 	}
 	client, err := app.Auth(context.Background())
 	if err != nil {
-		log.Fatal(err.Error())
+		panic(err.Error())
 	}
 	return &FirebaseAuthProvider{
 		Client: client,
