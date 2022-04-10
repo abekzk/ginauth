@@ -28,7 +28,7 @@ func newTestRouterFirebaseAuth(p Provider) *gin.Engine {
 	router.Use(NewAuthorizer(p))
 
 	router.GET("/", func(c *gin.Context) {
-		token := c.MustGet(FirebaseAuthTokenKey).(FirebaseAuthToken)
+		token := c.MustGet(FirebaseAuthTokenKey).(*auth.Token)
 		c.String(http.StatusOK, token.UID)
 	})
 

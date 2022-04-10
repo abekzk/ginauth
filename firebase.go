@@ -11,8 +11,6 @@ import (
 
 const FirebaseAuthTokenKey = "firebaseToken"
 
-type FirebaseAuthToken *auth.Token
-
 type firebaseClient interface {
 	VerifyIDToken(context.Context, string) (*auth.Token, error)
 }
@@ -49,5 +47,5 @@ func (provider *FirebaseAuthProvider) apply(c *gin.Context) {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-	c.Set(FirebaseAuthTokenKey, FirebaseAuthToken(token))
+	c.Set(FirebaseAuthTokenKey, token)
 }
